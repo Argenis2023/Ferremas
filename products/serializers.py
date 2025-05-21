@@ -8,6 +8,11 @@ class PriceSerializer(serializers.ModelSerializer):
         model = Price
         fields = ['Valor']
 
+    def validate_Valor(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("El valor del precio debe ser positivo.")
+        return value
+
 class ProductSerializer(serializers.ModelSerializer):
     Código_del_producto = serializers.CharField(source='code')
     Marca = serializers.CharField(source='brand')
@@ -18,6 +23,11 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['Código_del_producto', 'Marca', 'Código', 'Nombre', 'Precio']
+
+    def validate_Código_del_producto(self, value):
+        if Product.objects.filter(code=value).exists():
+            raise serializers.ValidationError("El código del producto ya existe.")
+        return value
 
     def create(self, validated_data):
         precios_data = self.initial_data.get('Precio', [])
@@ -39,7 +49,6 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.save()
 
-        # Reemplazar precios existentes
         instance.prices.all().delete()
         for precio_data in precios_data:
             Price.objects.create(product=instance, value=precio_data['Valor'])
