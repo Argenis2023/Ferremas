@@ -22,7 +22,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['Código_del_producto', 'Marca', 'Código', 'Nombre', 'Precio']
+        fields = ['id', 'Código_del_producto', 'Marca', 'Código', 'Nombre', 'Precio']
 
     def validate_Código_del_producto(self, value):
         if Product.objects.filter(code=value).exists():
