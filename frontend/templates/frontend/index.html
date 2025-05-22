@@ -20,113 +20,188 @@
         <button type="button" id="cancel-btn" style="display:none;">Cancelar Edición</button>
     </form>
 
+    <h2>Movimientos de Inventario</h2>
+    <form id="movement-form">
+        <label>Producto:
+            <select id="product-select"></select>
+        </label><br>
+        <label>Tipo de movimiento:
+            <select id="movement-type">
+                <option value="IN">Entrada</option>
+                <option value="OUT">Salida</option>
+            </select>
+        </label><br>
+        <label>Cantidad: <input type="number" id="movement-quantity" min="1" required></label><br>
+        <label>Descripción: <input type="text" id="movement-description"></label><br>
+        <button type="submit">Registrar Movimiento</button>
+    </form>
+
+    <div id="movement-list"></div>
+
 <script>
 const apiUrl = '/api/products/';
+const movementApiUrl = '/api/inventory-movements/';
 
-// Cargar y mostrar productos
 async function fetchProducts() {
-  const res = await fetch(apiUrl);
-  const data = await res.json();
-  const container = document.getElementById('product-list');
-  container.innerHTML = '';
-  data.forEach(product => {
-    let prices = product.Precio.map(p => p.Valor).join(', ');
-    container.innerHTML += `
-      <div>
-        <strong>${product.Código_del_producto}</strong> - ${product.Nombre} - ${product.Marca} - Precios: ${prices}
-        <button onclick="startEdit(${product.id})">Editar</button>
-        <button onclick="deleteProduct(${product.id})">Eliminar</button>
-      </div>
-    `;
-  });
-}
-
-// Eliminar producto por id
-async function deleteProduct(id) {
-  if (!confirm('¿Seguro quieres eliminar este producto?')) return;
-  const res = await fetch(apiUrl + id + '/', { method: 'DELETE' });
-  if (res.ok) {
-    alert('Producto eliminado');
-    fetchProducts();
-  } else {
-    alert('Error al eliminar producto');
-  }
-}
-
-// Iniciar edición, carga datos en formulario
-function startEdit(id) {
-  fetch(apiUrl + id + '/')
-    .then(res => res.json())
-    .then(product => {
-      document.getElementById('code').value = product.Código_del_producto;
-      document.getElementById('brand').value = product.Marca;
-      document.getElementById('brand_code').value = product.Código;
-      document.getElementById('name').value = product.Nombre;
-      document.getElementById('price').value = product.Precio[0]?.Valor || '';
-      document.getElementById('code').disabled = true;
-      document.getElementById('submit-btn').textContent = 'Actualizar Producto';
-      document.getElementById('cancel-btn').style.display = 'inline-block';
-      document.getElementById('product-form').dataset.editing = id;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    const container = document.getElementById('product-list');
+    const select = document.getElementById('product-select');
+    container.innerHTML = '';
+    select.innerHTML = '<option value="">-- Selecciona producto --</option>';
+    data.forEach(product => {
+        let prices = product.Precio.map(p => p.Valor).join(', ');
+        container.innerHTML += `
+            <div>
+                <strong>${product.Código_del_producto}</strong> - ${product.Nombre} - ${product.Marca} - Precios: ${prices}
+                <button onclick="startEdit('${product.Código_del_producto}')">Editar</button>
+                <button onclick="deleteProduct('${product.Código_del_producto}')">Eliminar</button>
+            </div>
+        `;
+        select.innerHTML += `<option value="${product.id}">${product.Código_del_producto} - ${product.Nombre}</option>`;
     });
 }
 
-// Cancelar edición
+async function fetchMovements() {
+    const res = await fetch(movementApiUrl);
+    const data = await res.json();
+    const container = document.getElementById('movement-list');
+    container.innerHTML = '<h3>Historial de movimientos</h3>';
+    data.forEach(m => {
+        container.innerHTML += `
+            <div>
+                Producto ID: ${m.product} - Tipo: ${m.movement_type_display} - Cantidad: ${m.quantity} - Fecha: ${new Date(m.date).toLocaleString()} - ${m.description || ''}
+            </div>
+        `;
+    });
+}
+
+async function deleteProduct(code) {
+    if (!confirm('¿Seguro quieres eliminar este producto?')) return;
+    const res = await fetch(apiUrl + code + '/', { method: 'DELETE' });
+    if (res.ok) {
+        alert('Producto eliminado');
+        fetchProducts();
+        fetchMovements();
+    } else {
+        alert('Error al eliminar producto');
+    }
+}
+
+function startEdit(code) {
+    fetch(apiUrl + code + '/')
+        .then(res => res.json())
+        .then(product => {
+            document.getElementById('code').value = product.Código_del_producto;
+            document.getElementById('brand').value = product.Marca;
+            document.getElementById('brand_code').value = product.Código;
+            document.getElementById('name').value = product.Nombre;
+            document.getElementById('price').value = product.Precio[0]?.Valor || '';
+            document.getElementById('code').disabled = true;
+            document.getElementById('submit-btn').textContent = 'Actualizar Producto';
+            document.getElementById('cancel-btn').style.display = 'inline-block';
+            document.getElementById('product-form').dataset.editing = code;
+        });
+}
+
 document.getElementById('cancel-btn').addEventListener('click', () => {
-  document.getElementById('product-form').reset();
-  document.getElementById('code').disabled = false;
-  document.getElementById('submit-btn').textContent = 'Agregar Producto';
-  document.getElementById('cancel-btn').style.display = 'none';
-  delete document.getElementById('product-form').dataset.editing;
-});
-
-// Crear o actualizar producto
-document.getElementById('product-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const code = document.getElementById('code').value;
-  const brand = document.getElementById('brand').value;
-  const brand_code = document.getElementById('brand_code').value;
-  const name = document.getElementById('name').value;
-  const price = parseFloat(document.getElementById('price').value);
-
-  const productData = {
-    "Código_del_producto": code,
-    "Marca": brand,
-    "Código": brand_code,
-    "Nombre": name,
-    "Precio": [{ "Valor": price }]
-  };
-
-  const isEditing = e.target.dataset.editing;
-
-  let url = apiUrl;
-  let method = 'POST';
-
-  if (isEditing) {
-    url += isEditing + '/';
-    method = 'PUT';
-  }
-
-  const res = await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(productData)
-  });
-
-  if (res.ok) {
-    fetchProducts();
-    e.target.reset();
+    document.getElementById('product-form').reset();
     document.getElementById('code').disabled = false;
     document.getElementById('submit-btn').textContent = 'Agregar Producto';
     document.getElementById('cancel-btn').style.display = 'none';
-    delete e.target.dataset.editing;
-  } else {
-    alert('Error al guardar producto');
-  }
+    delete document.getElementById('product-form').dataset.editing;
 });
 
-// Carga inicial
+document.getElementById('product-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const code = document.getElementById('code').value;
+    const brand = document.getElementById('brand').value;
+    const brand_code = document.getElementById('brand_code').value;
+    const name = document.getElementById('name').value;
+    const price = parseFloat(document.getElementById('price').value);
+
+    const productData = {
+        "Código_del_producto": code,
+        "Marca": brand,
+        "Código": brand_code,
+        "Nombre": name,
+        "Precio": [{ "Valor": price }]
+    };
+
+    const isEditing = e.target.dataset.editing;
+
+    let url = apiUrl;
+    let method = 'POST';
+
+    if (isEditing) {
+        url += isEditing + '/';
+        method = 'PUT';
+    }
+
+    const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productData)
+    });
+
+    if (res.ok) {
+        fetchProducts();
+        fetchMovements();
+        e.target.reset();
+        document.getElementById('code').disabled = false;
+        document.getElementById('submit-btn').textContent = 'Agregar Producto';
+        document.getElementById('cancel-btn').style.display = 'none';
+        delete e.target.dataset.editing;
+    } else {
+        alert('Error al guardar producto');
+    }
+});
+
+document.getElementById('movement-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const product = document.getElementById('product-select').value;
+    const movement_type = document.getElementById('movement-type').value;
+    const quantity = parseInt(document.getElementById('movement-quantity').value);
+    const description = document.getElementById('movement-description').value;
+
+    if (!product) {
+        alert('Selecciona un producto');
+        return;
+    }
+    if (quantity <= 0) {
+        alert('Cantidad debe ser mayor a 0');
+        return;
+    }
+
+    const movementData = {
+        product,
+        movement_type,
+        quantity,
+        description
+    };
+
+    const res = await fetch(movementApiUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(movementData)
+    });
+
+    if (res.ok) {
+        alert('Movimiento registrado');
+        fetchProducts();
+        fetchMovements();
+        e.target.reset();
+    } else {
+        const err = await res.json();
+        alert('Error al registrar movimiento: ' + JSON.stringify(err));
+    }
+});
+
 fetchProducts();
+fetchMovements();
 </script>
 </body>
 </html>
+
+

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Price
+from .models import Product, Price, InventoryMovement
 
 class PriceSerializer(serializers.ModelSerializer):
     Valor = serializers.DecimalField(source='value', max_digits=10, decimal_places=2)
@@ -13,19 +13,30 @@ class PriceSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("El valor del precio debe ser positivo.")
         return value
 
+class InventoryMovementSerializer(serializers.ModelSerializer):
+    movement_type_display = serializers.CharField(source='get_movement_type_display', read_only=True)
+    
+    class Meta:
+        model = InventoryMovement
+        fields = ['id', 'product', 'date', 'movement_type', 'movement_type_display', 'quantity', 'description']
+        read_only_fields = ['date', 'movement_type_display']
+
 class ProductSerializer(serializers.ModelSerializer):
     Código_del_producto = serializers.CharField(source='code')
     Marca = serializers.CharField(source='brand')
     Código = serializers.CharField(source='brand_code')
     Nombre = serializers.CharField(source='name')
     Precio = PriceSerializer(many=True, source='prices', read_only=True)
+    quantity = serializers.IntegerField(read_only=True)  # stock actual
 
     class Meta:
         model = Product
-        fields = ['id', 'Código_del_producto', 'Marca', 'Código', 'Nombre', 'Precio']
+        fields = ['id', 'Código_del_producto', 'Marca', 'Código', 'Nombre', 'Precio', 'quantity']
 
     def validate_Código_del_producto(self, value):
-        if Product.objects.filter(code=value).exists():
+        # En update permitir el mismo código sin error
+        product_id = self.instance.id if self.instance else None
+        if Product.objects.exclude(id=product_id).filter(code=value).exists():
             raise serializers.ValidationError("El código del producto ya existe.")
         return value
 

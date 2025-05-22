@@ -1,17 +1,13 @@
 from rest_framework import viewsets
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Product, InventoryMovement
+from .serializers import ProductSerializer, InventoryMovementSerializer
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    lookup_field = 'code'  # Usar código en URL
 
-from rest_framework import routers
-from products.views import ProductViewSet
+class InventoryMovementViewSet(viewsets.ModelViewSet):
+    queryset = InventoryMovement.objects.all()
+    serializer_class = InventoryMovementSerializer
 
-router = routers.DefaultRouter()
-router.register('products', ProductViewSet)
-
-urlpatterns = [
-    # otras URLs
-] + router.urls
