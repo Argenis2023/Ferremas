@@ -15,11 +15,16 @@ class PriceSerializer(serializers.ModelSerializer):
 
 class InventoryMovementSerializer(serializers.ModelSerializer):
     movement_type_display = serializers.CharField(source='get_movement_type_display', read_only=True)
-    
+    product_name = serializers.CharField(source='product.name', read_only=True)  # ← AÑADE ESTO
+
     class Meta:
         model = InventoryMovement
-        fields = ['id', 'product', 'date', 'movement_type', 'movement_type_display', 'quantity', 'description']
-        read_only_fields = ['date', 'movement_type_display']
+        fields = [
+            'id', 'product', 'product_name', 'date', 'movement_type',
+            'movement_type_display', 'quantity', 'description'
+        ]
+        read_only_fields = ['date', 'movement_type_display', 'product_name']
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
