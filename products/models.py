@@ -1,11 +1,18 @@
 from django.db import models
 
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
 class Product(models.Model):
     code = models.CharField(max_length=20, unique=True)
     brand = models.CharField(max_length=100)
     brand_code = models.CharField(max_length=50)
     name = models.CharField(max_length=200)
     quantity = models.PositiveIntegerField(default=0)  # Stock disponible
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
 
     def __str__(self):
         return f"{self.code} - {self.name}"
@@ -44,4 +51,3 @@ class InventoryMovement(models.Model):
 
     def __str__(self):
         return f"{self.product.code} - {self.get_movement_type_display()} - {self.quantity} unidades"
-

@@ -1,6 +1,12 @@
 from rest_framework import viewsets
-from .models import Product, InventoryMovement
-from .serializers import ProductSerializer, InventoryMovementSerializer
+from .models import Category, Product, InventoryMovement
+from .serializers import ProductSerializer, InventoryMovementSerializer, CategorySerializer
+from rest_framework import permissions
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
