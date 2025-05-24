@@ -8,6 +8,7 @@ urlpatterns = [
     path('logout/', frontend_views.logout_view, name='logout'),
     path('api/', include('products.urls')),  # Incluir rutas API products
     path('', frontend_views.index, name='index'),
+    path('store/', include('store.urls')),  # Tu nueva tienda
 ]
 
 

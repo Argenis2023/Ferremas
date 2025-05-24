@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'products',
     'rest_framework',
     'frontend',  # Asegúrate de que tu app frontend esté registrada aquí
+    'store'
 ]
 
 MIDDLEWARE = [
