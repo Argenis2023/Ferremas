@@ -12,7 +12,8 @@
 <body>
   {% if user.is_authenticated %}
     <div class="header">
-      <a href="{% url 'logout' %}" class="logout"><i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión</a>
+      <a href="{% url 'logout' %}" class="logout"><i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión</a> <br>
+      <a href="{% url 'store_home' %}"><i class="fa-solid fa-sign-out-alt"></i>Tienda</a>
     </div>
   {% endif %}
 

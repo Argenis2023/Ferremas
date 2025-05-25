@@ -48,15 +48,19 @@ h1, h2, h3 {
 .list {
   margin: 16px 0;
 }
+
+/* --- Estilos de tarjetas de ítems --- */
 .category-item, .product-item, .movement-item {
-  align-items: center;
   background: #f9fbff;
   border-radius: 4px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
   padding: 12px;
+  box-shadow: 0 2px 8px #0001;
 }
+
 .category-item button,
 .product-item button {
   background: #b71c1c;
@@ -65,7 +69,9 @@ h1, h2, h3 {
   color: white;
   cursor: pointer;
   padding: 6px 12px;
+  margin-left: 6px;
   transition: background 0.2s;
+  font-size: 15px;
 }
 .category-item button:hover,
 .product-item button:hover {
@@ -131,17 +137,49 @@ h1, h2, h3 {
   }
 }
 
+/* --- Miniatura de producto --- */
 .mini-thumb {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 6px;
-    margin-right: 10px;
-    vertical-align: middle;
-    background: #eee;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 10px;
+  vertical-align: middle;
+  background: #eee;
+}
+
+/* --- Nuevo: organización interna de los ítems del producto --- */
+.product-info {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.04em;
+}
+.product-meta {
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
 .stock {
-    color: #0731eb;
-    font-weight: bold;
-    margin-left: 10px;
+  color: #1976d2;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 4px;
+}
+
+/* Para mejor visual en móvil */
+@media (max-width: 600px) {
+  .product-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .product-meta {
+    align-items: flex-start;
+    margin-top: 8px;
+  }
+  .mini-thumb {
+    margin-bottom: 8px;
+    margin-right: 0;
+  }
 }
