@@ -12,8 +12,7 @@
 <body>
   {% if user.is_authenticated %}
     <div class="header">
-      <a href="{% url 'logout' %}" class="logout"><i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión</a> <br>
-      <a href="{% url 'store_home' %}"><i class="fa-solid fa-sign-out-alt"></i> Store</a>
+      <a href="{% url 'logout' %}" class="logout"><i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión</a>
     </div>
   {% endif %}
 
@@ -201,16 +200,16 @@ function renderProducts() {
     const filtered = filterValue ? allProducts.filter(p => (p.categoria_id || "") == filterValue) : allProducts;
     filtered.forEach(product => {
         let prices = product.Precio.map(p => p.Valor).join(', ');
-        let catName = product.categoria_cerrarmbre || '';
+        let catName = product.categoria_nombre || '';
         // Miniatura
-        const img = `<img src="${product.image_url || 'https://via.placeholder.com/40'}" class="mini-thumb" alt="img">`;
+        const img = `<img src="${product.image_url || '/static/store/no-image.png'}" class="mini-thumb" alt="img">`;
         // Stock disponible (quantity)
         const stock = typeof product.quantity !== 'undefined' ? `<span class="stock">Stock: ${product.quantity}</span>` : '';
         container.innerHTML += `
             <div class="product-item">
                 ${img}
                 <span class="product-info">
-                    <strong>${product.Código_del_producto}</strong> - ${product.cerrarmbre} - ${product.Marca}
+                    <strong>${product.Código_del_producto}</strong> - ${product.Nombre} - ${product.Marca}
                     ${catName ? ` - <span style="color:#1976d2;">${catName}</span>` : ''}
                     - Precios: ${prices}
                     ${stock}
@@ -221,7 +220,7 @@ function renderProducts() {
                 </span>
             </div>
         `;
-        select.innerHTML += `<option value="${product.id}">${product.Código_del_producto} - ${product.cerrarmbre}</option>`;
+        select.innerHTML += `<option value="${product.id}">${product.Código_del_producto} - ${product.Nombre}</option>`;
     });
 }
 
@@ -246,7 +245,7 @@ function startEdit(code) {
             document.getElementById('code').value = product.Código_del_producto;
             document.getElementById('brand').value = product.Marca;
             document.getElementById('brand_code').value = product.Código;
-            document.getElementById('name').value = product.cerrarmbre;
+            document.getElementById('name').value = product.Nombre;
             document.getElementById('price').value = product.Precio[0]?.Valor || '';
             document.getElementById('product-category').value = product.categoria_id || "";
             document.getElementById('image_url').value = product.image_url || "";
@@ -261,7 +260,7 @@ document.getElementById('cancel-btn').addEventListener('click', () => {
     document.getElementById('product-form').reset();
     document.getElementById('code').disabled = false;
     document.getElementById('submit-btn').textContent = 'Agregar Producto';
-    document.getElementById('cancel-btn').style.display = 'cerrarne';
+    document.getElementById('cancel-btn').style.display = 'none';
     delete document.getElementById('product-form').dataset.editing;
 });
 
