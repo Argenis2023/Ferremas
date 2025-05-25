@@ -66,7 +66,10 @@
         }
         list.innerHTML = filtered.map(p => `
             <div class="store-product-card">
-                <div class="product-main">
+                 <div class="product-main">
+                    <div class="product-image-box">
+                      <img src="${p.image_url}" alt="" class="product-image"> 
+                    </div>
                     <h3>${p.Nombre}</h3>
                     <div class="product-meta">
                         <span class="prod-brand"><i class="fa-solid fa-tag"></i> ${p.Marca}</span>

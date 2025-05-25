@@ -13,6 +13,7 @@ class Product(models.Model):
     name = models.CharField(max_length=200)
     quantity = models.PositiveIntegerField(default=0)  # Stock disponible
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
+    image_url = models.URLField(max_length=500, blank=True, null=True)  # Nuevo campo
 
     def __str__(self):
         return f"{self.code} - {self.name}"

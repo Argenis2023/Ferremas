@@ -38,6 +38,7 @@ class ProductSerializer(serializers.ModelSerializer):
     Nombre = serializers.CharField(source='name')
     Precio = PriceSerializer(many=True, source='prices', read_only=True)
     quantity = serializers.IntegerField(read_only=True)  # stock actual
+    image_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     categoria_id = serializers.PrimaryKeyRelatedField(
         source='category', queryset=Category.objects.all(), required=False, allow_null=True
@@ -50,7 +51,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'id', 'Código_del_producto', 'Marca', 'Código', 'Nombre',
-            'Precio', 'quantity', 'categoria_id', 'categoria_nombre'
+            'Precio', 'quantity', 'categoria_id', 'categoria_nombre', 'image_url'
         ]
 
     def validate_Código_del_producto(self, value):
@@ -63,12 +64,17 @@ class ProductSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         precios_data = self.initial_data.get('Precio', [])
         category = validated_data.pop('category', None)
+        image_url = validated_data.pop('image_url', None)
+        if not image_url:
+            image_url = validated_data.get('image_url', None)
+            
         product = Product.objects.create(
             code=validated_data.get('code'),
             brand=validated_data.get('brand'),
             brand_code=validated_data.get('brand_code'),
             name=validated_data.get('name'),
-            category=category
+            category=category,
+            image_url=image_url
         )
         for precio_data in precios_data:
             Price.objects.create(product=product, value=precio_data['Valor'])
@@ -82,6 +88,7 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.brand_code = validated_data.get('brand_code', instance.brand_code)
         instance.name = validated_data.get('name', instance.name)
         instance.category = category if category is not None else instance.category
+        instance.image_url = validated_data.get('image_url', instance.image_url)
         instance.save()
 
         # Actualizar precios

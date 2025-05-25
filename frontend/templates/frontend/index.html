@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inventario de Productos</title>
   <!-- Font Awesome para iconos -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-p+UqK1JjFv6CIrV6YBDTkz8aoMsCyM0ijyS8f9kGQ5Jz1EzJDu3E6b6J8Z4X0HJ2bE6Q/5Qg0KZ2n2VCmZoKQw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="{% static 'frontend/styles.css' %}">
 </head>
 <body>
@@ -60,6 +60,10 @@
       <div class="form-group">
         <label for="price">Precio</label>
         <input type="number" step="0.01" id="price" required>
+      </div>
+      <div class="form-group">
+        <label for="image_url">Imagen (URL)</label>
+        <input type="url" id="image_url" placeholder="https://...">
       </div>
       <div class="form-actions fullwidth">
         <button type="submit" id="submit-btn" class="btn primary"><i class="fa-solid fa-floppy-disk"></i> Agregar Producto</button>
@@ -197,14 +201,18 @@ function renderProducts() {
     filtered.forEach(product => {
         let prices = product.Precio.map(p => p.Valor).join(', ');
         let catName = product.categoria_nombre || '';
-        let stock = product.quantity ?? ''; // <-- Stock disponible aquí
+        // Miniatura
+        const img = `<img src="${product.image_url || 'https://via.placeholder.com/40'}" class="mini-thumb" alt="img">`;
+        // Stock disponible (quantity)
+        const stock = typeof product.quantity !== 'undefined' ? `<span class="stock">Stock: ${product.quantity}</span>` : '';
         container.innerHTML += `
             <div class="product-item">
+                ${img}
                 <span class="product-info">
                     <strong>${product.Código_del_producto}</strong> - ${product.Nombre} - ${product.Marca}
                     ${catName ? ` - <span style="color:#1976d2;">${catName}</span>` : ''}
-                    - <span style="color:#1a7737;"><b>Stock:</b> ${stock}</span>
                     - Precios: ${prices}
+                    ${stock}
                 </span>
                 <span>
                     <button onclick="startEdit('${product.Código_del_producto}')">Editar</button>
@@ -240,6 +248,7 @@ function startEdit(code) {
             document.getElementById('name').value = product.Nombre;
             document.getElementById('price').value = product.Precio[0]?.Valor || '';
             document.getElementById('product-category').value = product.categoria_id || "";
+            document.getElementById('image_url').value = product.image_url || "";
             document.getElementById('code').disabled = true;
             document.getElementById('submit-btn').textContent = 'Actualizar Producto';
             document.getElementById('cancel-btn').style.display = 'inline-block';
@@ -264,6 +273,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     const name = document.getElementById('name').value;
     const price = parseFloat(document.getElementById('price').value);
     const category = document.getElementById('product-category').value;
+    const image_url = document.getElementById('image_url').value;
 
     const productData = {
         "Código_del_producto": code,
@@ -271,7 +281,8 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
         "Código": brand_code,
         "Nombre": name,
         "Precio": [{ "Valor": price }],
-        "categoria_id": category || null
+        "categoria_id": category || null,
+        "image_url": image_url || null
     };
 
     const isEditing = e.target.dataset.editing;
