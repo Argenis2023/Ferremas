@@ -68,7 +68,7 @@
             <div class="store-product-card">
                  <div class="product-main">
                     <div class="product-image-box">
-                      <img src="${p.image_url}" alt="" class="product-image"> 
+                      <img src="${p.image_url || '/static/store/no-image.png'}", alt="" class="product-image"> 
                     </div>
                     <h3>${p.Nombre}</h3>
                     <div class="product-meta">
