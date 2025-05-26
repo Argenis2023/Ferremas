@@ -7,22 +7,12 @@
     <link rel="stylesheet" href="{% static 'store/styles.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .mini-thumb {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 0.7em;
-            margin-right: 1em;
-            border: 1px solid #ddd;
-            background: #f4f4f4;
-        }
         .cart-product-main {
             display: flex;
             align-items: center;
         }
         @media (max-width:600px){
             .cart-product-main { flex-direction:column; align-items:flex-start; }
-            .mini-thumb { margin-bottom: 0.7em; }
         }
     </style>
 </head>
@@ -47,6 +37,22 @@
         <div id="cart-summary"></div>
     </main>
     <script>
+    // ----------- CSRF TOKEN HELPER -----------
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
     // ----------- FUNCIONES DEL CARRITO -----------
     function getCart() {
         let cart = localStorage.getItem('ferremas_cart');
@@ -122,9 +128,6 @@
             let converted = (p.price / rate);
             let subtotal = converted * p.quantity;
             total += subtotal;
-            let img = p.image_url
-                ? `<img class="mini-thumb" src="${p.image_url}" alt="imagen de ${p.name}">`
-                : `<img class="mini-thumb" src="https://via.placeholder.com/60x60?text=Sin+Imagen" alt="Sin imagen">`;
             return `
                 <div class="store-product-card">
                     <div class="cart-product-main">
@@ -156,13 +159,16 @@
         </div>`;
     }
 
-    // --- Checkout que descuenta stock (solo como antes, no cambia por moneda) ---
+    // --- Checkout que descuenta stock (con CSRF token en cabecera) ---
     async function checkout() {
         let cart = getCart();
         if (cart.length === 0) {
             alert("No hay productos en el carrito.");
             return;
         }
+
+        // OBTIENE EL CSRF TOKEN
+        const csrftoken = getCookie('csrftoken');
 
         // Obtener todos los productos desde la API para mapear code -> id
         let res = await fetch('/api/products/');
@@ -178,7 +184,10 @@
             }
             let resp = await fetch("/api/inventory-movements/", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrftoken
+                },
                 body: JSON.stringify({
                     product: productoApi.id,
                     movement_type: "OUT",

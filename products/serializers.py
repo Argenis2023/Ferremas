@@ -15,7 +15,7 @@ class PriceSerializer(serializers.ModelSerializer):
 
 class InventoryMovementSerializer(serializers.ModelSerializer):
     movement_type_display = serializers.CharField(source='get_movement_type_display', read_only=True)
-    product_name = serializers.CharField(source='product.name', read_only=True)  # ← AÑADE ESTO
+    product_name = serializers.CharField(source='product.name', read_only=True) 
 
     class Meta:
         model = InventoryMovement
