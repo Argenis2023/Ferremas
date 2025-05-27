@@ -9,25 +9,71 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>Ferremas Store</h1>
-        <a href="{% url 'store_cart' %}"><i class="fa-solid fa-cart-shopping"></i> Carrito</a>
-    </header>
-    <main>
-        <h2>Productos en venta</h2>
-
-        <div class="store-filters">
+    <!-- HEADER -->
+    <header class="main-header">
+        <div class="header-left">
+            <span class="site-title"><i class="fa-solid fa-store"></i> Ferremas</span>
+        </div>
+        <div class="header-center">
             <input type="text" id="search-input" placeholder="Buscar productos...">
             <select id="filter-category">
                 <option value="">Todas las categorías</option>
             </select>
         </div>
+        <div class="header-right">
+            <a href="{% url 'store_cart' %}" class="cart-btn">
+                <i class="fa-solid fa-cart-shopping"></i> Carrito
+                <span id="cart-count-badge" class="cart-count-badge" style="display:none;">0</span>
+            </a>
+        </div>
+    </header>
 
+    <!-- CINTA DESPLAZABLE DE MONEDAS (ahora DEBAJO del header) -->
+    <div class="currency-marquee-area">
+        <div class="currency-marquee" id="currency-marquee">
+            <span id="marquee-content">
+                💱 Cargando valores de monedas...
+            </span>
+        </div>
+    </div>
+
+    <main>
+        <h2>Productos en venta</h2>
         <div id="product-list" class="store-grid"></div>
     </main>
 
     <script>
-    // Cargar productos y categorías desde la API existente
+    // ----------- CINTA DE MONEDAS DEBAJO DEL HEADER -----------
+    let usdValue = null, eurValue = null;
+    async function loadCurrencyBanner() {
+        let usd = "...", eur = "...";
+        let error = false;
+        try {
+            const usdRes = await fetch("https://mindicador.cl/api/dolar");
+            const usdData = await usdRes.json();
+            usdValue = usdData.serie && usdData.serie[0] && usdData.serie[0].valor;
+            if (usdValue) usd = Number(usdValue).toLocaleString("es-CL", {style:'currency', currency:'CLP', minimumFractionDigits:0});
+        } catch { error = true; }
+        try {
+            const eurRes = await fetch("https://mindicador.cl/api/euro");
+            const eurData = await eurRes.json();
+            eurValue = eurData.serie && eurData.serie[0] && eurData.serie[0].valor;
+            if (eurValue) eur = Number(eurValue).toLocaleString("es-CL", {style:'currency', currency:'CLP', minimumFractionDigits:0});
+        } catch { error = true; }
+
+        let hora = new Date().toLocaleTimeString("es-CL",{hour:'2-digit',minute:'2-digit'});
+        let content = error
+            ? '💱 No se pudo obtener el valor del dólar o euro.'
+            : `<i class="fa-solid fa-dollar-sign"></i> 1 USD = <strong>${usd}</strong> CLP &nbsp;&nbsp;|&nbsp;&nbsp; <i class="fa-solid fa-euro-sign"></i> 1 EUR = <strong>${eur}</strong> CLP &nbsp;&nbsp;|&nbsp;&nbsp; <span style="font-size:0.93em;color:#555;">${hora}</span>`;
+
+        document.getElementById('marquee-content').innerHTML = content;
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCurrencyBanner();
+        setInterval(loadCurrencyBanner, 900000);
+    });
+
+    // ----------- RESTO DEL JS (BÚSQUEDA, PRODUCTOS, CARRITO) -----------
     const apiUrl = "/api/products/";
     const categoriesUrl = "/api/categories/";
 
@@ -68,7 +114,7 @@
             <div class="store-product-card">
                  <div class="product-main">
                     <div class="product-image-box">
-                      <img src="${p.image_url || '/static/store/no-image.png'}", alt="" class="product-image"> 
+                      <img src="${p.image_url || '/static/store/no-image.png'}" alt="" class="product-image"> 
                     </div>
                     <h3>${p.Nombre}</h3>
                     <div class="product-meta">
@@ -86,50 +132,61 @@
         `).join('');
     }
 
+    function updateCartCountBadge() {
+        let cart = localStorage.getItem('ferremas_cart');
+        cart = cart ? JSON.parse(cart) : [];
+        const badge = document.getElementById('cart-count-badge');
+        if (!badge) return;
+        const total = cart.reduce((sum, item) => sum + Number(item.quantity), 0);
+        if (total > 0) {
+            badge.style.display = "inline-block";
+            badge.textContent = total;
+        } else {
+            badge.style.display = "none";
+        }
+    }
+
     document.getElementById('search-input').addEventListener('input', renderProducts);
     document.getElementById('filter-category').addEventListener('change', renderProducts);
 
-    // Simulación de función para el carrito (próximo paso)
     function addToCart(code) {
-    // Buscar el producto en el array "products"
-    const product = products.find(p => p.Código_del_producto === code);
-    if (!product) {
-        alert('Producto no encontrado');
-        return;
-    }
-
-    // Recuperar carrito actual
-    let cart = localStorage.getItem('ferremas_cart');
-    cart = cart ? JSON.parse(cart) : [];
-
-    // Chequear si ya está, si sí aumenta cantidad, si no agregar nuevo
-    let item = cart.find(i => i.code === code);
-    const stock = product.quantity ?? 0;
-
-    if (item) {
-        if (item.quantity < stock) {
-            item.quantity += 1;
-        } else {
-            alert('¡No puedes agregar más, no hay suficiente stock!');
+        const product = products.find(p => p.Código_del_producto === code);
+        if (!product) {
+            alert('Producto no encontrado');
             return;
         }
-    } else {
-        cart.push({
-            code: product.Código_del_producto,
-            name: product.Nombre,
-            brand: product.Marca,
-            price: product.Precio.length > 0 ? parseFloat(product.Precio[0].Valor) : 0,
-            max_stock: stock,
-            quantity: 1,
-            category: product.categoria_nombre || ""
-        });
+
+        let cart = localStorage.getItem('ferremas_cart');
+        cart = cart ? JSON.parse(cart) : [];
+
+        let item = cart.find(i => i.code === code);
+        const stock = product.quantity ?? 0;
+
+        if (item) {
+            if (item.quantity < stock) {
+                item.quantity += 1;
+            } else {
+                alert('¡No puedes agregar más, no hay suficiente stock!');
+                return;
+            }
+        } else {
+            cart.push({
+                code: product.Código_del_producto,
+                name: product.Nombre,
+                brand: product.Marca,
+                price: product.Precio.length > 0 ? parseFloat(product.Precio[0].Valor) : 0,
+                max_stock: stock,
+                quantity: 1,
+                category: product.categoria_nombre || ""
+            });
+        }
+        localStorage.setItem('ferremas_cart', JSON.stringify(cart));
+        alert('¡Producto agregado al carrito!');
+        updateCartCountBadge();
     }
-    localStorage.setItem('ferremas_cart', JSON.stringify(cart));
-    alert('¡Producto agregado al carrito!');
-}
 
+    document.addEventListener('DOMContentLoaded', updateCartCountBadge);
 
-    // Inicializar
     fetchCategories().then(fetchProducts);
     </script>
 </body>

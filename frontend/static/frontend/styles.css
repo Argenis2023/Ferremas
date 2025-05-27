@@ -49,7 +49,6 @@ h1, h2, h3 {
   margin: 16px 0;
 }
 
-/* --- Estilos de tarjetas de ítems --- */
 .category-item, .product-item, .movement-item {
   background: #f9fbff;
   border-radius: 4px;
@@ -137,7 +136,6 @@ h1, h2, h3 {
   }
 }
 
-/* --- Miniatura de producto --- */
 .mini-thumb {
   width: 40px;
   height: 40px;
@@ -148,7 +146,6 @@ h1, h2, h3 {
   background: #eee;
 }
 
-/* --- Nuevo: organización interna de los ítems del producto --- */
 .product-info {
   flex: 1;
   min-width: 0;
@@ -182,4 +179,73 @@ h1, h2, h3 {
     margin-bottom: 8px;
     margin-right: 0;
   }
+}
+
+/* ---- MODAL DE EDICIÓN DE PRODUCTO ---- */
+.edit-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0; top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(22, 50, 105, 0.18);
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn .2s;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.edit-modal-content {
+    background: #fff;
+    border-radius: 13px;
+    box-shadow: 0 8px 40px #1976d244;
+    padding: 32px 28px 20px 28px;
+    min-width: 340px;
+    max-width: 480px;
+    margin: 0 20px;
+    position: relative;
+    animation: modalOpen .24s;
+}
+@keyframes modalOpen { from { transform: translateY(-25px); opacity:0.5; } to { transform: none; opacity:1; } }
+
+.edit-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+.edit-modal-title {
+    font-size: 1.29em;
+    font-weight: 700;
+    color: #1976d2;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.edit-modal-close {
+    font-size: 1.6em;
+    cursor: pointer;
+    color: #b71c1c;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+.edit-modal-close:hover {
+    color: #1976d2;
+}
+
+/* Reutiliza tus .grid-form, .btn, etc. */
+/* Opcional: mejora el aspecto del fondo del modal */
+.edit-modal input, .edit-modal select {
+    font-size: 1em;
+}
+.edit-modal .btn {
+    margin-top: 0;
+}
+@media (max-width: 600px) {
+    .edit-modal-content {
+        min-width: 92vw;
+        padding: 17px 5vw;
+    }
 }

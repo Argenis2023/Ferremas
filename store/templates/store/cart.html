@@ -6,15 +6,6 @@
     <title>Carrito de compras | Ferremas</title>
     <link rel="stylesheet" href="{% static 'store/styles.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .cart-product-main {
-            display: flex;
-            align-items: center;
-        }
-        @media (max-width:600px){
-            .cart-product-main { flex-direction:column; align-items:flex-start; }
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -36,6 +27,15 @@
         <div id="cart-list" class="store-grid"></div>
         <div id="cart-summary"></div>
     </main>
+
+    <!-- MODAL de procesamiento -->
+    <div id="modal-procesando">
+      <div class="modal-content">
+        <i class="fa-solid fa-spinner fa-spin" id="modal-spinner" style="font-size:3em;color:#1976d2; margin-bottom:16px;"></i>
+        <div id="modal-procesando-text" style="font-size:1.2em; margin-top:6px;">Procesando tu compra...</div>
+      </div>
+    </div>
+
     <script>
     // ----------- CSRF TOKEN HELPER -----------
     function getCookie(name) {
@@ -159,7 +159,7 @@
         </div>`;
     }
 
-    // --- Checkout que descuenta stock (con CSRF token en cabecera) ---
+    // --- Checkout con modal de procesamiento ---
     async function checkout() {
         let cart = getCart();
         if (cart.length === 0) {
@@ -167,14 +167,22 @@
             return;
         }
 
-        // OBTIENE EL CSRF TOKEN
-        const csrftoken = getCookie('csrftoken');
+        // Mostrar modal de procesando
+        const modal = document.getElementById("modal-procesando");
+        const modalText = document.getElementById("modal-procesando-text");
+        const modalSpinner = document.getElementById("modal-spinner");
+        modalSpinner.style.display = "inline-block";
+        modalText.innerHTML = "Procesando tu compra...";
+        modal.style.display = "block";
 
-        // Obtener todos los productos desde la API para mapear code -> id
+        // Simula 5 segundos de procesamiento
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // Lógica real de compra:
+        const csrftoken = getCookie('csrftoken');
         let res = await fetch('/api/products/');
         let productsApi = await res.json();
 
-        // Mapea los codes del carrito a sus IDs
         let errors = [];
         for (let item of cart) {
             let productoApi = productsApi.find(p => p.Código_del_producto === item.code);
@@ -202,15 +210,21 @@
             }
         }
 
+        // Mostrar resultado visual en el modal
+        modalSpinner.style.display = "none";
         if (errors.length === 0) {
             localStorage.removeItem("ferremas_cart");
             renderCart();
-            alert("¡Compra realizada con éxito!");
+            modalText.innerHTML = "<span style='color:green;font-weight:bold;'><i class='fa-solid fa-circle-check'></i> Compra procesada con éxito</span>";
         } else {
-            let mensaje = "Algunos productos no pudieron ser comprados:\n\n" +
-                errors.map(e => `- ${e.producto}: ${e.mensaje}`).join("\n");
-            alert(mensaje);
+            let mensaje = "Algunos productos no pudieron ser comprados:<br><br>" +
+                errors.map(e => `- ${e.producto}: ${e.mensaje}`).join("<br>");
+            modalText.innerHTML = `<span style='color:#d32f2f; font-weight:bold;'><i class='fa-solid fa-circle-xmark'></i> Compra con errores</span><br><br>${mensaje}`;
         }
+        // Espera 2 segundos más y cierra el modal
+        setTimeout(() => {
+            modal.style.display = "none";
+        }, 2000);
     }
 
     // Inicializar

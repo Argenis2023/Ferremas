@@ -185,3 +185,518 @@ h1, h2 {
     border: none;
 }
 /* -------------------------------------- */
+
+.cart-product-main {
+    display: flex;
+    align-items: center;
+}
+@media (max-width:600px){
+    .cart-product-main { flex-direction:column; align-items:flex-start; }
+}
+
+/* Modal de procesamiento */
+#modal-procesando {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0; top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.2);
+}
+#modal-procesando .modal-content {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 32px #0004;
+    padding: 36px 32px;
+    max-width: 340px;
+    margin: 13vh auto;
+    text-align: center;
+    position: relative;
+}
+
+/* --- HEADER NUEVO Ferremas --- */
+.main-header {
+    background: #1976d2;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-radius: 10px 10px 0 0;
+    min-height: 56px;
+    box-sizing: border-box;
+    margin-bottom: 24px;
+}
+
+.header-left {
+    font-size: 1.6em;
+    font-weight: bold;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.site-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 550px;
+    margin: 0 24px;
+}
+
+.header-center input[type="text"] {
+    padding: 7px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 4px;
+    font-size: 1em;
+    width: 210px;
+}
+
+.header-center select {
+    padding: 7px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #f5faff;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.cart-btn {
+    background: #1565c0;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 22px;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+.cart-btn:hover {
+    background: #003f88;
+}
+
+@media (max-width: 850px) {
+    .main-header {
+        flex-direction: column;
+        gap: 12px;
+        padding: 18px 8px;
+    }
+    .header-center {
+        margin: 0;
+        max-width: 100%;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+.main-header {
+    background: #1976d2;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-radius: 10px 10px 0 0;
+    min-height: 56px;
+    box-sizing: border-box;
+    margin-bottom: 24px;
+}
+.header-left {
+    font-size: 1.6em;
+    font-weight: bold;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+.site-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.header-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 550px;
+    margin: 0 24px;
+}
+.header-center input[type="text"] {
+    padding: 7px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 4px;
+    font-size: 1em;
+    width: 210px;
+}
+.header-center select {
+    padding: 7px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #f5faff;
+}
+.header-right {
+    display: flex;
+    align-items: center;
+}
+.cart-btn {
+    background: #1565c0;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 22px;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+    position: relative;
+}
+.cart-btn:hover {
+    background: #003f88;
+}
+.cart-count-badge {
+    display: inline-block;
+    position: absolute;
+    top: -7px;
+    right: -17px;
+    background: #b71c1c;
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 2px solid #fff;
+    min-width: 24px;
+    text-align: center;
+    z-index: 1;
+    transform: scale(1);
+    transition: transform 0.2s;
+}
+/* Bump animation para el badge */
+.cart-count-badge.bump {
+    animation: bumpCartBadge 0.35s;
+}
+@keyframes bumpCartBadge {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.25); }
+    35% { transform: scale(0.85); }
+    60% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+}
+@media (max-width: 850px) {
+    .main-header {
+        flex-direction: column;
+        gap: 12px;
+        padding: 18px 8px;
+    }
+    .header-center {
+        margin: 0;
+        max-width: 100%;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+/* --- HEADER Ferremas --- */
+.main-header {
+    background: #1976d2;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-radius: 10px 10px 0 0;
+    min-height: 56px;
+    box-sizing: border-box;
+    margin-bottom: 24px;
+}
+
+.header-left {
+    font-size: 1.6em;
+    font-weight: bold;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.site-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 550px;
+    margin: 0 24px;
+}
+
+.header-center input[type="text"] {
+    padding: 7px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 4px;
+    font-size: 1em;
+    width: 210px;
+}
+
+.header-center select {
+    padding: 7px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #f5faff;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.cart-btn {
+    background: #1565c0;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 22px;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+    position: relative;
+}
+.cart-btn:hover {
+    background: #003f88;
+}
+
+/* Badge cantidad */
+.cart-count-badge {
+    display: inline-block;
+    position: absolute;
+    top: -7px;
+    right: -17px;
+    background: #b71c1c;
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 2px solid #fff;
+    min-width: 24px;
+    text-align: center;
+    z-index: 1;
+}
+
+@media (max-width: 850px) {
+    .main-header {
+        flex-direction: column;
+        gap: 12px;
+        padding: 18px 8px;
+    }
+    .header-center {
+        margin: 0;
+        max-width: 100%;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+.cart-count-badge {
+    display: inline-block;
+    position: absolute;
+    top: -4px;
+    right: -10px;
+    background: #fff;
+    color: #1976d2;
+    border-radius: 4px;
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: 700;
+    border: none;
+    min-width: 13px;
+    text-align: center;
+    z-index: 2;
+    box-shadow: none;
+    line-height: 1.1;
+    height: 15px;
+}
+
+/* -------- HEADER Ferremas -------- */
+.main-header {
+    background: #1976d2;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-radius: 10px 10px 0 0;
+    min-height: 56px;
+    box-sizing: border-box;
+    margin-bottom: 0; /* Cambiado para que la cinta quede pegada abajo */
+}
+
+.header-left {
+    font-size: 1.6em;
+    font-weight: bold;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.site-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 550px;
+    margin: 0 24px;
+}
+
+.header-center input[type="text"] {
+    padding: 7px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 4px;
+    font-size: 1em;
+    width: 210px;
+}
+
+.header-center select {
+    padding: 7px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #f5faff;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.cart-btn {
+    background: #1565c0;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 22px;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+    position: relative;
+}
+.cart-btn:hover {
+    background: #003f88;
+}
+
+/* Badge cantidad */
+.cart-count-badge {
+    display: inline-block;
+    position: absolute;
+    top: -4px;
+    right: -10px;
+    background: #fff;
+    color: #1976d2;
+    border-radius: 4px;
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: 700;
+    border: none;
+    min-width: 13px;
+    text-align: center;
+    z-index: 2;
+    box-shadow: none;
+    line-height: 1.1;
+    height: 15px;
+}
+
+/* -------- CINTA DESPLAZABLE DE MONEDAS -------- */
+.currency-marquee-area {
+    width: 100vw;
+    min-height: 34px;
+    background: #f4f8fb;
+    color: #1976d2;
+    overflow: hidden;
+    border-bottom: 1.5px solid #1976d2;
+    box-shadow: 0 1px 8px #1976d210;
+    position: relative;
+    z-index: 11;
+    margin-bottom: 24px; /* Espacio entre la cinta y el main */
+}
+.currency-marquee {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 1.07em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    height: 34px;
+}
+#marquee-content {
+    display: inline-block;
+    padding-left: 100vw;
+    animation: marquee-move 18s linear infinite;
+}
+@keyframes marquee-move {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-100%); }
+}
+
+/* ...El resto de tu CSS de productos, main, cards, responsive... */
+@media (max-width: 850px) {
+    .main-header {
+        flex-direction: column;
+        gap: 12px;
+        padding: 18px 8px;
+    }
+    .header-center {
+        margin: 0;
+        max-width: 100%;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .currency-marquee-area {
+        font-size: 0.99em;
+    }
+}
