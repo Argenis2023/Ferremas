@@ -8,14 +8,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>Carrito de compras</h1>
-        <a href="{% url 'store_home' %}"><i class="fa-solid fa-arrow-left"></i> Volver a la tienda</a>
+    <!-- HEADER con el mismo estilo de la tienda -->
+    <header class="main-header">
+        <div class="header-left">
+            <span class="site-title"><i class="fa-solid fa-store"></i> Ferremas</span>
+        </div>
+        <div class="header-center">
+            <h1 style="color:#fff; font-size:1.6em; margin:0; font-weight:800; letter-spacing:0.03em; background:none; border:none; padding:0;">Carrito de compras</h1>
+        </div>
+        <div class="header-right">
+            <a href="{% url 'store_home' %}" class="cart-btn">
+                <i class="fa-solid fa-arrow-left"></i> Volver a la tienda
+            </a>
+        </div>
     </header>
+    
     <main>
         <h2>Tu carrito</h2>
 
-        <div style="margin:10px 0">
+        <div style="margin:10px 0 18px 0;">
             <label for="currency-select"><strong>Moneda de pago: </strong></label>
             <select id="currency-select">
                 <option value="CLP">Pesos Chilenos (CLP)</option>
@@ -37,7 +48,7 @@
     </div>
 
     <script>
-    // ----------- CSRF TOKEN HELPER -----------
+    // ----------- CSRF TOKEN -----------
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {

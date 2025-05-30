@@ -5,23 +5,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inventario de Productos</title>
-  <!-- Font Awesome para iconos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="{% static 'frontend/styles.css' %}">
 </head>
 <body>
-  {% if user.is_authenticated %}
-    <div class="header">
-      <a href="{% url 'logout' %}" class="logout"><i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión</a> <br>
-      <a href="{% url 'store_home' %}"><i class="fa-solid fa-sign-out-alt"></i>Tienda</a>
+  <!-- HEADER PRINCIPAL A TODO EL ANCHO -->
+  <header class="main-header">
+    <div class="main-header-content">
+      <div class="header-title">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        Inventario Ferremas
+      </div>
+      <nav class="header-links">
+        <a href="{% url 'store_home' %}"><i class="fa-solid fa-store"></i> Tienda</a>
+        <a href="{% url 'logout' %}" class="logout"><i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión</a>
+      </nav>
     </div>
-  {% endif %}
+  </header>
 
   <section class="center-card categories-section">
     <h2><i class="fa-solid fa-tags"></i> Categorías</h2>
     <form id="category-form" class="inline-form">
       <input type="text" id="category-name" placeholder="Nueva categoría" required>
-      <button type="submit" class="btn primary">Agregar</button>
+      <button type="submit" class="btn accent"><i class="fa-solid fa-plus"></i> Agregar</button>
     </form>
     <div id="category-list" class="list"></div>
   </section>
@@ -73,12 +82,11 @@
     </form>
   </section>
 
-  <!-- MODAL PARA EDITAR PRODUCTO -->
   <div id="edit-modal" class="edit-modal">
     <div class="edit-modal-content">
       <div class="edit-modal-header">
         <span class="edit-modal-title"><i class="fa-solid fa-pen-to-square"></i> Editar Producto</span>
-        <span class="edit-modal-close" id="edit-modal-close">&times;</span>
+        <button class="edit-modal-close" id="edit-modal-close" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="edit-form" class="grid-form">
         <div class="form-group">
@@ -183,9 +191,9 @@ async function fetchCategories() {
     selectEdit.innerHTML = '<option value="">-- Sin categoría --</option>';
     data.forEach(cat => {
         container.innerHTML += `
-            <div class="category-item" style="margin-bottom:8px;">
+            <div class="category-item">
                 <span>${cat.name}</span>
-                <button onclick="deleteCategory(${cat.id})" style="background:#b71c1c;">Eliminar</button>
+                <button onclick="deleteCategory(${cat.id})" class="btn danger"><i class="fa-solid fa-trash"></i> Eliminar</button>
             </div>
         `;
         select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
@@ -245,16 +253,14 @@ function renderProducts() {
     filtered.forEach(product => {
         let prices = product.Precio.map(p => p.Valor).join(', ');
         let catName = product.categoria_nombre || '';
-        // Miniatura
-        const img = `<img src="${product.image_url || '/static/store/no-image.png'}" class="mini-thumb" alt="img">`;
-        // Stock disponible (quantity)
+        const img = `<img src="${product.image_url || '/static/store/no-image.png'}" class="mini-thumb" alt="img ${product.Nombre}">`;
         const stock = typeof product.quantity !== 'undefined' ? `<span class="stock">Stock: ${product.quantity}</span>` : '';
         container.innerHTML += `
             <div class="product-item">
                 ${img}
                 <span class="product-info">
                     <strong>${product.Código_del_producto}</strong> - ${product.Nombre} - ${product.Marca}
-                    ${catName ? ` - <span style="color:#1976d2;">${catName}</span>` : ''}
+                    ${catName ? ` - <span class="category-name-display">${catName}</span>` : ''}
                     - Precios: ${prices}
                     ${stock}
                 </span>
@@ -374,11 +380,6 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
         'X-CSRFToken': csrftoken
     };
 
-    if (isEditing) {
-        url += isEditing + '/';
-        method = 'PUT';
-    }
-
     const res = await fetch(url, {
         method,
         headers,
@@ -389,10 +390,6 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
         fetchProducts();
         fetchMovements();
         e.target.reset();
-        document.getElementById('code').disabled = false;
-        document.getElementById('submit-btn').textContent = 'Agregar Producto';
-        document.getElementById('cancel-btn').style.display = 'none';
-        delete e.target.dataset.editing;
     } else {
         alert('Error al guardar producto');
     }
@@ -400,10 +397,6 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
 
 document.getElementById('cancel-btn').addEventListener('click', () => {
     document.getElementById('product-form').reset();
-    document.getElementById('code').disabled = false;
-    document.getElementById('submit-btn').textContent = 'Agregar Producto';
-    document.getElementById('cancel-btn').style.display = 'none';
-    delete document.getElementById('product-form').dataset.editing;
 });
 
 // MOVIMIENTOS DE INVENTARIO
@@ -411,15 +404,19 @@ async function fetchMovements() {
     const res = await fetch(movementApiUrl);
     const data = await res.json();
     const container = document.getElementById('movement-list');
-    container.innerHTML = '<h3>Historial de movimientos</h3>';
-    data.forEach(m => {
-        container.innerHTML += `
-            <div class="movement-item">
-        <strong>${m.product_name}</strong> (ID: ${m.product}) - Tipo: ${m.movement_type_display} - 
-        Cantidad: ${m.quantity} - Fecha: ${new Date(m.date).toLocaleString()} - ${m.description || ''}
-    </div>
-        `;
-    });
+    container.innerHTML = '';
+    if (data.length === 0) {
+        container.innerHTML = '<p>No hay movimientos registrados.</p>';
+    } else {
+        data.forEach(m => {
+            container.innerHTML += `
+                <div class="movement-item">
+                  <strong>${m.product_name}</strong> (ID: ${m.product}) - Tipo: ${m.movement_type_display} - 
+                  Cantidad: ${m.quantity} - Fecha: ${new Date(m.date).toLocaleString()} - ${m.description || ''}
+                </div>
+            `;
+        });
+    }
 }
 
 document.getElementById('movement-form').addEventListener('submit', async e => {

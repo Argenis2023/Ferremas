@@ -1,41 +1,25 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Iniciar sesión | Ferremas Inventario</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f3f3f3; }
-        .login-container {
-            max-width: 350px;
-            margin: 60px auto;
-            background: #fff;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px #0002;
-            padding: 24px 30px 20px 30px;
-        }
-        h2 { text-align: center; margin-bottom: 22px; color: #1976d2; }
-        label { display: block; margin-bottom: 6px; color: #333; }
-        input[type="text"], input[type="password"] {
-            width: 100%; padding: 8px; margin-bottom: 14px; border: 1px solid #ccc; border-radius: 3px;
-        }
-        button, input[type="submit"] {
-            width: 100%; padding: 9px; background: #1976d2; color: #fff;
-            border: none; border-radius: 3px; font-size: 1rem;
-            cursor: pointer; transition: background .2s;
-        }
-        button:hover, input[type="submit"]:hover { background: #135b9c; }
-        .errorlist { color: #b71c1c; margin-bottom: 12px; }
-    </style>
+    <link rel="stylesheet" href="{% static 'frontend/login.css' %}">
 </head>
 <body>
+    <div class="login-outer-bg"></div>
     <div class="login-container">
+        <div class="login-header">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>Ferremas Inventario</span>
+        </div>
         <h2>Iniciar sesión</h2>
         {% if form.errors %}
             <div class="errorlist">
-                Usuario o contraseña incorrectos.
+                <i class="fa-solid fa-triangle-exclamation"></i> Usuario o contraseña incorrectos.
             </div>
         {% endif %}
-        <form method="post">
+        <form method="post" autocomplete="off">
             {% csrf_token %}
             <label for="id_username">Usuario</label>
             <input type="text" name="username" autofocus required id="id_username">
@@ -43,9 +27,8 @@
             <label for="id_password">Contraseña</label>
             <input type="password" name="password" required id="id_password">
 
-            <input type="submit" value="Ingresar">
+            <input type="submit" value="Ingresar" class="btn-primary">
         </form>
     </div>
 </body>
 </html>
-
